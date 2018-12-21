@@ -6,6 +6,7 @@ import org.computronium.chess.Board.Companion.HORIZONTAL_AND_VERTICAL_OFFSETS
 import org.computronium.chess.Board.Companion.PAWN_ABOUT_TO_PROMOTE_RANK
 import org.computronium.chess.Board.Companion.PAWN_HOME_RANK
 import org.computronium.chess.Board.Companion.PAWN_MOVE_DIRECTION
+import org.computronium.chess.Board.Companion.onBoard
 import java.util.*
 
 /**
@@ -14,7 +15,6 @@ import java.util.*
 class BoardState(val board: Board, private val whoseTurn: PieceColor, private val moveNumber: Int, val lastBoardState : BoardState?) {
 
     private var enPassantCaptureCoordinate: Coordinate? = null
-
     private var enPassantPawnToCapture: Coordinate? = null
     
     private var canQueensideCastle = hashMapOf(PieceColor.WHITE to false, PieceColor.BLACK to false)
@@ -75,10 +75,6 @@ class BoardState(val board: Board, private val whoseTurn: PieceColor, private va
             PieceType.QUEEN -> findQueenMoves(moves, coordinate)
             PieceType.KING -> findKingMoves(moves, coordinate)
         }
-    }
-
-    private fun onBoard(file: Int, rank: Int) : Boolean {
-        return rank in 0..7 && file in 0..7
     }
 
     private fun findKnightMoves(moves: MutableList<BoardState>, from: Coordinate) {

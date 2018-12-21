@@ -140,10 +140,6 @@ class Board(private val board: Array<Array<Piece?>>) {
         return false
     }
 
-    private fun onBoard(file: Int, rank: Int) : Boolean {
-        return rank in 0..7 && file in 0..7
-    }
-
     companion object {
 
         val PAWN_MOVE_DIRECTION = hashMapOf(PieceColor.WHITE to 1, PieceColor.BLACK to -1)
@@ -156,6 +152,10 @@ class Board(private val board: Array<Array<Piece?>>) {
         val KNIGHT_OFFSETS = arrayOf(Pair(1, 2), Pair(1, -2), Pair(-1, 2), Pair(-1, -2),
                                                         Pair(2, 1), Pair(2, -1), Pair(-2, 1), Pair(-2, -1))
 
+        fun onBoard(file: Int, rank: Int) : Boolean {
+            return rank in 0..7 && file in 0..7
+        }
+
         fun fromStrings(a : Array<String>) : Board {
             val board = Array(8) { Array<Piece?>(8) { null }}
             for (i in 0..7) {
@@ -164,19 +164,6 @@ class Board(private val board: Array<Array<Piece?>>) {
                 }
             }
             return Board(board)
-        }
-
-        fun newGame() : Board {
-            return fromStrings(arrayOf(
-                "rnbqkbnr",
-                "pppppppp",
-                "        ",
-                "        ",
-                "        ",
-                "        ",
-                "PPPPPPPP",
-                "RNBQKBNR"
-            ))
         }
     }
 }
