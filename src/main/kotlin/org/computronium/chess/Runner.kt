@@ -7,19 +7,26 @@ fun main(args : Array<String>) {
 
     val random = Random()
 
-    var boardState = BoardState.newGame()
+    var boardState = SearchNode.newGame()
 
     for (m in 0..300) {
         println(boardState)
 
-        val moves = boardState.findMoves()
+        if (boardState.isCheckmate()) {
 
-        if (moves.isEmpty()) {
-
-            println(if (boardState.whoseTurnIsInCheck) "Mate!" else "Stalemate!")
+            println("Mate!")
             exitProcess(0)
+
+        } else if (boardState.isStalemate()) {
+
+            println("Stalemate!")
+            exitProcess(0)
+
         }
 
-        boardState = moves[random.nextInt(moves.size)]
+        val move = boardState.moves[random.nextInt(boardState.moves.size)]
+        println(move)
+        move.apply(boardState.board)
+        boardState = SearchNode(boardState.board)
     }
 }
