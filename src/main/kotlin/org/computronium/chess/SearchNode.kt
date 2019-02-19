@@ -1,19 +1,17 @@
 package org.computronium.chess
 
-import org.computronium.chess.Board.Companion.QUEEN_MOVE_OFFSETS
-import org.computronium.chess.Board.Companion.ROOK_MOVE_OFFSETS
-import org.computronium.chess.Board.Companion.onBoard
+import org.computronium.chess.BoardState.Companion.QUEEN_MOVE_OFFSETS
+import org.computronium.chess.BoardState.Companion.ROOK_MOVE_OFFSETS
+import org.computronium.chess.BoardState.Companion.onBoard
 import org.computronium.chess.moves.*
 
-class SearchNode(val board: Board) {
-
-    val enPassantCaptureCoordinate = board.enPassantCapturePos
+class SearchNode(val boardState: BoardState) {
 
     val moves = mutableListOf<Move>()
 
     init {
 
-        val piecePositions = board.piecePositions(board.whoseTurn)
+        val piecePositions = boardState.piecePositions(boardState.whoseTurn)
 
         for (piecePosition in piecePositions) {
             findMoves(piecePosition)
@@ -21,17 +19,16 @@ class SearchNode(val board: Board) {
     }
 
     private fun maybeAddMove(move: Move) {
-        move.apply(board)
-        if (!board.isKingInCheck(board.whoseTurn.oppositeColor())) {
-            board.whoseTurnIsInCheck = board.isKingInCheck(board.whoseTurn)
+        move.apply(boardState)
+        if (!boardState.isKingInCheck(1 - boardState.whoseTurn)) {
+            move.resultsInCheck = boardState.isKingInCheck(boardState.whoseTurn)
             moves.add(move)
         }
-        move.rollback(board)
+        move.rollback(boardState)
     }
-
     private fun findMoves(index: Int) {
 
-        when (board[index]?.type) {
+        when (boardState[index]?.type) {
             PieceType.PAWN -> findPawnMoves(index)
             PieceType.ROOK -> findRookMoves(index)
             PieceType.BISHOP -> findBishopMoves(index)
@@ -43,10 +40,10 @@ class SearchNode(val board: Board) {
 
     private fun findKnightMoves(pos: Int) {
 
-        for (offset in Board.KNIGHT_MOVE_OFFSETS) {
+        for (offset in BoardState.KNIGHT_MOVE_OFFSETS) {
             val newPos = pos + offset
 
-            if (Board.onBoard(newPos) && board[newPos]?.color != board.whoseTurn) {
+            if (BoardState.onBoard(newPos) && boardState[newPos]?.color != boardState.whoseTurn) {
                 maybeAddMove(StandardMove(pos, newPos))
             }
         }
@@ -57,13 +54,13 @@ class SearchNode(val board: Board) {
         for (offset in offsets) {
             var newIndex = from + offset
 
-            while (Board.onBoard(newIndex) && board.empty(newIndex)) {
+            while (BoardState.onBoard(newIndex) && boardState.empty(newIndex)) {
                 maybeAddMove(StandardMove(from, newIndex))
                 newIndex += offset
             }
 
             // see if capture
-            if (onBoard(newIndex) && board[newIndex]?.color == board.whoseTurn.oppositeColor()) {
+            if (onBoard(newIndex) && boardState[newIndex]?.color == 1 - boardState.whoseTurn) {
                 maybeAddMove(StandardCapture(from, newIndex))
             }
         }
@@ -71,25 +68,25 @@ class SearchNode(val board: Board) {
 
     private fun findKingMoves(from: Int) {
 
-        for (offset in Board.KING_MOVE_OFFSETS) {
+        for (offset in BoardState.KING_MOVE_OFFSETS) {
             val to = from + offset
-            if (onBoard(to) && board[to]?.color != board.whoseTurn) {
+            if (onBoard(to) && boardState[to]?.color != boardState.whoseTurn) {
                 maybeAddMove(KingMove(from, to))
             }
         }
 
-        if (KingCastleQueenSide.isPossible(board)) {
-            maybeAddMove(KingCastleQueenSide())
+        if (CastleQueenSide.isPossible(boardState)) {
+            maybeAddMove(CastleQueenSide())
         }
 
-        if (KingCastleKingSide.isPossible(board)) {
-            maybeAddMove(KingCastleKingSide())
+        if (CastleKingSide.isPossible(boardState)) {
+            maybeAddMove(CastleKingSide())
         }
     }
 
     private fun findBishopMoves(from: Int) {
 
-        findMovesViaOffsets(Board.BISHOP_MOVE_OFFSETS, from)
+        findMovesViaOffsets(BoardState.BISHOP_MOVE_OFFSETS, from)
     }
 
     private fun findRookMoves(from: Int) {
@@ -97,13 +94,13 @@ class SearchNode(val board: Board) {
         for (offset in ROOK_MOVE_OFFSETS) {
             var newIndex = from + offset
 
-            while (Board.onBoard(newIndex) && board.empty(newIndex)) {
+            while (BoardState.onBoard(newIndex) && boardState.empty(newIndex)) {
                 maybeAddMove(RookMove(from, newIndex))
                 newIndex += offset
             }
 
             // see if capture
-            if (onBoard(newIndex) && board[newIndex]?.color == board.whoseTurn.oppositeColor()) {
+            if (onBoard(newIndex) && boardState[newIndex]?.color == 1 - boardState.whoseTurn) {
                 maybeAddMove(RookCapture(from, newIndex))
             }
         }
@@ -117,14 +114,14 @@ class SearchNode(val board: Board) {
 
     private fun findPawnMoves(from: Int) {
 
-        val dir = board.sideConfig().pawnMoveDirection
+        val dir = boardState.whoseTurnConfig().pawnMoveDirection
 
         // Can the pawn move forward one?
         val forwardOnePosition = from + dir
 
-        if (board.empty(forwardOnePosition)) {
+        if (boardState.empty(forwardOnePosition)) {
 
-            if (board.sideConfig().isAboutToPromote(from)) {
+            if (boardState.whoseTurnConfig().isAboutToPromote(from)) {
                 maybeAddMove(PawnPromotion(from, forwardOnePosition, PieceType.QUEEN))
                 maybeAddMove(PawnPromotion(from, forwardOnePosition, PieceType.ROOK))
                 maybeAddMove(PawnPromotion(from, forwardOnePosition, PieceType.KNIGHT))
@@ -134,11 +131,11 @@ class SearchNode(val board: Board) {
             }
 
             // Can the pawn move forward two?
-            if (board.sideConfig().isPawnHomeRank(from)) {
+            if (boardState.whoseTurnConfig().isPawnHomeRank(from)) {
 
                 val forwardTwoPosition = from + dir + dir
 
-                if (board.empty(forwardTwoPosition)) {
+                if (boardState.empty(forwardTwoPosition)) {
 
                     // We want to also note the special coordinates for handling en passant.
                     maybeAddMove(PawnInitialMove(from, forwardTwoPosition, forwardOnePosition))
@@ -148,11 +145,11 @@ class SearchNode(val board: Board) {
         
         // Pawn captures.
         for (dx in listOf(-1, 1)) {
-            val capturePos = from + dx
+            val capturePos = from + boardState.whoseTurnConfig().pawnMoveDirection + dx
             if (onBoard(capturePos)) {
-                if (board[capturePos]?.color == board.whoseTurn.oppositeColor()) {
+                if (boardState[capturePos]?.color == 1 - boardState.whoseTurn) {
 
-                    if (board.sideConfig().isAboutToPromote(from)) {
+                    if (boardState.whoseTurnConfig().isAboutToPromote(from)) {
                         // Capture with promotion.
                         maybeAddMove(PawnPromotion(from, capturePos, PieceType.QUEEN))
                         maybeAddMove(PawnPromotion(from, capturePos, PieceType.ROOK))
@@ -162,7 +159,7 @@ class SearchNode(val board: Board) {
                         // Ordinary capture.
                         maybeAddMove(StandardCapture(from, capturePos))
                     }
-                } else if (capturePos == board.enPassantCapturePos) {
+                } else if (capturePos == boardState.enPassantCapturePos) {
                     // En passant capture.
                     maybeAddMove(PawnEnPassantCapture(from))
                 }
@@ -171,34 +168,36 @@ class SearchNode(val board: Board) {
     }
 
     fun isCheckmate(): Boolean {
-        return board.whoseTurnIsInCheck && moves.isEmpty()
+        return boardState.whoseTurnConfig().isInCheck && moves.isEmpty()
     }
 
     fun isStalemate(): Boolean {
-        return !board.whoseTurnIsInCheck && moves.isEmpty()
+        return !boardState.whoseTurnConfig().isInCheck && moves.isEmpty()
+    }
+
+    override fun toString(): String {
+        return "$boardState\nmoves=${moves.map{ move -> move.toString(boardState) }}"
     }
 
     companion object {
 
-        private fun fromStrings(a : Array<String>) : SearchNode {
-            return fromStrings(a, PieceColor.WHITE)
-        }
-
-        fun fromStrings(a : Array<String>, whoseTurn: PieceColor) : SearchNode {
-            return SearchNode(Board.fromStrings(a))
+        fun fromFEN(s: String) : SearchNode {
+            val board = BoardState.fromFEN(s)
+            return SearchNode(board)
         }
 
         fun newGame() : SearchNode {
-            return fromStrings(arrayOf(
-                "rnbqkbnr",
-                "pppppppp",
-                "        ",
-                "        ",
-                "        ",
-                "        ",
-                "PPPPPPPP",
-                "RNBQKBNR"
-            ))
+            return fromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+//            return fromFEN(arrayOf(
+//                "rnbqkbnr",
+//                "pppppppp",
+//                "        ",
+//                "        ",
+//                "        ",
+//                "        ",
+//                "PPPPPPPP",
+//                "RNBQKBNR"
+//            ))
         }
     }
 }

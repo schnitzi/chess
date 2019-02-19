@@ -1,30 +1,34 @@
 package org.computronium.chess.moves
 
-import org.computronium.chess.Board
+import org.computronium.chess.BoardState
 import org.computronium.chess.Piece
 
 class PawnEnPassantCapture(val from: Int) : Move() {
 
     private var capturedPiece: Piece? = null
 
-    override fun apply(board: Board) {
+    override fun apply(boardState: BoardState) {
 
-        val pawnToCapturePos = board.enPassantCapturePos!! - board.sideConfig().pawnMoveDirection
-        capturedPiece = board[pawnToCapturePos]
-        board[pawnToCapturePos] = null
-        board[board.enPassantCapturePos!!] = board[from]
-        board[from] = null
+        val pawnToCapturePos = boardState.enPassantCapturePos!! - boardState.whoseTurnConfig().pawnMoveDirection
+        capturedPiece = boardState[pawnToCapturePos]
+        boardState[pawnToCapturePos] = null
+        boardState[boardState.enPassantCapturePos!!] = boardState[from]
+        boardState[from] = null
 
-        super.apply(board)
+        super.apply(boardState)
     }
 
-    override fun rollback(board: Board) {
+    override fun rollback(boardState: BoardState) {
 
-        super.rollback(board)
+        super.rollback(boardState)
 
-        val pawnToCapturePos : Int = board.enPassantCapturePos!! - board.sideConfig().pawnMoveDirection
-        board[from] = board[pawnToCapturePos]
-        board[pawnToCapturePos] = capturedPiece
-        board[board.enPassantCapturePos!!] = null
+        val pawnToCapturePos : Int = boardState.enPassantCapturePos!! - boardState.whoseTurnConfig().pawnMoveDirection
+        boardState[from] = boardState[pawnToCapturePos]
+        boardState[pawnToCapturePos] = capturedPiece
+        boardState[boardState.enPassantCapturePos!!] = null
+    }
+
+    override fun toString(boardState: BoardState): String {
+        return "" + BoardState.fileChar(from) + "x" + BoardState.squareName(boardState.enPassantCapturePos!!) + " e.p."
     }
 }

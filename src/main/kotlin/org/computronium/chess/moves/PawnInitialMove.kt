@@ -1,13 +1,17 @@
 package org.computronium.chess.moves
 
-import org.computronium.chess.Board
+import org.computronium.chess.BoardState
 
 class PawnInitialMove(from: Int, to: Int, private val over: Int) : StandardMove(from, to) {
 
-    override fun apply(board: Board) {
+    override fun apply(boardState: BoardState) {
 
-        super.apply(board)
+        super.apply(boardState)
 
-        board.enPassantCapturePos = over
+        boardState.enPassantCapturePos = over
+    }
+
+    override fun toString(boardState: BoardState): String {
+        return BoardState.squareName(to)
     }
 }

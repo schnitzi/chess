@@ -1,17 +1,20 @@
 package org.computronium.chess
 
-enum class Piece(val color: PieceColor, val type: PieceType, val char: Char) {
+enum class Piece(val color: Int, val type: PieceType, val char: Char) {
 
-        WHITE_KING(PieceColor.WHITE, PieceType.KING, 'K'),
-        WHITE_QUEEN(PieceColor.WHITE, PieceType.QUEEN, 'Q'),
-        WHITE_BISHOP(PieceColor.WHITE, PieceType.BISHOP, 'B'),
-        WHITE_KNIGHT(PieceColor.WHITE, PieceType.KNIGHT, 'K'),
-        WHITE_PAWN(PieceColor.WHITE, PieceType.PAWN, 'P'),
-        BLACK_KING(PieceColor.BLACK, PieceType.KING, 'k'),
-        BLACK_QUEEN(PieceColor.BLACK, PieceType.QUEEN, 'q'),
-        BLACK_BISHOP(PieceColor.BLACK, PieceType.BISHOP, 'b'),
-        BLACK_KNIGHT(PieceColor.BLACK, PieceType.KNIGHT, 'k'),
-        BLACK_PAWN(PieceColor.BLACK, PieceType.PAWN, 'p');
+        WHITE_KING(BoardState.WHITE, PieceType.KING, 'K'),
+        WHITE_QUEEN(BoardState.WHITE, PieceType.QUEEN, 'Q'),
+        WHITE_BISHOP(BoardState.WHITE, PieceType.BISHOP, 'B'),
+        WHITE_KNIGHT(BoardState.WHITE, PieceType.KNIGHT, 'N'),
+        WHITE_ROOK(BoardState.WHITE, PieceType.ROOK, 'R'),
+        WHITE_PAWN(BoardState.WHITE, PieceType.PAWN, 'P'),
+        BLACK_KING(BoardState.BLACK, PieceType.KING, 'k'),
+        BLACK_QUEEN(BoardState.BLACK, PieceType.QUEEN, 'q'),
+        BLACK_BISHOP(BoardState.BLACK, PieceType.BISHOP, 'b'),
+        BLACK_KNIGHT(BoardState.BLACK, PieceType.KNIGHT, 'n'),
+        BLACK_ROOK(BoardState.BLACK, PieceType.ROOK, 'r'),
+        BLACK_PAWN(BoardState.BLACK, PieceType.PAWN, 'p');
+
 
     companion object {
         fun ofChar(char: Char) : Piece? {
@@ -23,7 +26,7 @@ enum class Piece(val color: PieceColor, val type: PieceType, val char: Char) {
             return null
         }
 
-        fun forTypeAndColor(type: PieceType, color: PieceColor): Piece? {
+        fun forTypeAndColor(type: PieceType, color: Int): Piece? {
             for (piece in values()) {
                 if (piece.type == type && piece.color == color) {
                     return piece
@@ -31,5 +34,9 @@ enum class Piece(val color: PieceColor, val type: PieceType, val char: Char) {
             }
             return null
         }
+    }
+
+    override fun toString(): String {
+        return "$char"
     }
 }

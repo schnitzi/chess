@@ -1,22 +1,24 @@
 package org.computronium.chess.moves
 
-import org.computronium.chess.Board
+import org.computronium.chess.BoardState
 
 class KingMove(from : Int, to : Int) : StandardMove(from, to) {
 
-    override fun apply(board: Board) {
+    override fun apply(boardState: BoardState) {
 
-        board.setCanQueenSideCastle(false)
-        board.setCanKingSideCastle(false)
+        val config = boardState.whoseTurnConfig()
+        config.canQueenSideCastle = false
+        config.canKingSideCastle = false
 
-        super.apply(board)
+        super.apply(boardState)
     }
 
-    override fun rollback(board: Board) {
+    override fun rollback(boardState: BoardState) {
 
-        super.rollback(board)
+        super.rollback(boardState)
 
-        board.setCanQueenSideCastle(true)
-        board.setCanKingSideCastle(true)
+        val config = boardState.whoseTurnConfig()
+        config.canQueenSideCastle = true
+        config.canKingSideCastle = true
     }
 }

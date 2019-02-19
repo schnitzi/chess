@@ -26,7 +26,7 @@ fun main(args : Array<String>) {
 
         val move = boardState.moves[random.nextInt(boardState.moves.size)]
         println(move)
-        move.apply(boardState.board)
-        boardState = SearchNode(boardState.board)
+        move.apply(boardState.boardState)
+        boardState = SearchNode(boardState.boardState)
     }
 }

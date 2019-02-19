@@ -1,34 +1,36 @@
 package org.computronium.chess.moves
 
-import org.computronium.chess.Board
+import org.computronium.chess.BoardState
 
 class RookMove(from : Int, to : Int) : StandardMove(from, to) {
 
     private var canQueenSideCastle = false
     private var canKingSideCastle = false
 
-    override fun apply(board: Board) {
+    override fun apply(boardState: BoardState) {
 
-        val homeRank = board.sideConfig().homeRankStart
+        val config = boardState.whoseTurnConfig()
+        val homeRank = config.homeRankStart
         if (from == homeRank) {     // queenside rook
-            canQueenSideCastle = board.canQueenSideCastle()
-            board.setCanQueenSideCastle(false)
+            canQueenSideCastle = config.canQueenSideCastle
+            config.canQueenSideCastle = false
         } else if (from == homeRank+7) {    // kingside rook
-            canKingSideCastle = board.canKingSideCastle()
-            board.setCanKingSideCastle(false)
+            canKingSideCastle = config.canKingSideCastle
+            config.canKingSideCastle = false
         }
 
-        super.apply(board)
+        super.apply(boardState)
     }
 
-    override fun rollback(board: Board) {
-        super.rollback(board)
+    override fun rollback(boardState: BoardState) {
+        super.rollback(boardState)
 
-        val homeRank = board.sideConfig().homeRankStart
+        val config = boardState.whoseTurnConfig()
+        val homeRank = config.homeRankStart
         if (from == homeRank) {
-            board.setCanQueenSideCastle(canQueenSideCastle)
+            config.canQueenSideCastle = canQueenSideCastle
         } else if (from == homeRank+7) {
-            board.setCanKingSideCastle(canKingSideCastle)
+            config.canKingSideCastle = canKingSideCastle
         }
     }
 }

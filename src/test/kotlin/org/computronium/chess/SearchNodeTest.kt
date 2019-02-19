@@ -13,23 +13,23 @@ import org.junit.runner.RunWith
 internal class SearchNodeTest {
 
     @Test
-    fun equals() {
-        Assert.assertEquals(SearchNode.newGame(), SearchNode.newGame())
-    }
-
-    @Test
     @UseDataProvider(value = "findMovesData")
-    fun findMoves(whoseMove: PieceColor, start: Array<String>, expectedMove: Array<String>) {
-        val startBoard = SearchNode.fromStrings(start, whoseMove)
-        val expected = Board.fromStrings(expectedMove)
+    fun findMoves(startFEN: String, expectedMoveFEN: String) {
+        val startBoard = SearchNode.fromFEN(startFEN)
+        println("start =\n$startBoard")
+        val expected = BoardState.fromFEN(expectedMoveFEN)
 
+        println("expected =\n$expected")
         var found = false
         for (move in startBoard.moves) {
-            move.apply(startBoard.board)
-            if (startBoard.board == expected) {
+            println("move = ${move.toString(startBoard.boardState)}\n")
+            move.apply(startBoard.boardState)
+            println("${startBoard.boardState}")
+            if (startBoard.boardState == expected) {
                 found = true
                 break
             }
+            move.rollback(startBoard.boardState)
         }
         Assert.assertTrue(found)
     }
@@ -42,87 +42,87 @@ internal class SearchNodeTest {
 //             @formatter:off
 
 
-            `$` (PieceColor.WHITE,
-                arrayOf(
-                    "rnbqkbnr",
-                    "pppppppp",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "PPPPPPPP",
-                    "RNBQKBNR"),
-                arrayOf(
-                    "rnbqkbnr",
-                    "pppppppp",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "       P",
-                    "PPPPPPP ",
-                    "RNBQKBNR")),
+//            `$` (BoardState.WHITE,
+//                arrayOf(
+//                    "rnbqkbnr",
+//                    "pppppppp",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "PPPPPPPP",
+//                    "RNBQKBNR"),
+//                arrayOf(
+//                    "rnbqkbnr",
+//                    "pppppppp",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "P       ",
+//                    " PPPPPPP",
+//                    "RNBQKBNR")),
+//
+//            `$` (BoardState.WHITE,
+//                arrayOf(
+//                    " k      ",
+//                    "     P  ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "    K   "),
+//                arrayOf(
+//                    " k   Q  ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "    K   ")),
 
-            `$` (PieceColor.WHITE,
-                arrayOf(
-                    " k      ",
-                    "     P  ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "    K   "),
-                arrayOf(
-                    " k   Q  ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "    K   ")),
+//            `$` (BoardState.WHITE,
+//                arrayOf(
+//                    " k  r   ",
+//                    "     P  ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "    K   "),
+//                arrayOf(
+//                    " k  B   ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "    K   ")),
 
-            `$` (PieceColor.WHITE,
-                arrayOf(
-                    " k  r   ",
-                    "     P  ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "    K   "),
-                arrayOf(
-                    " k  B   ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "    K   ")),
+//            `$` (BoardState.BLACK,
+//                arrayOf(
+//                    " k      ",
+//                    "        ",
+//                    "        ",
+//                    "     K  ",
+//                    "        ",
+//                    "        ",
+//                    "   p    ",
+//                    "        "),
+//                arrayOf(
+//                    " k      ",
+//                    "        ",
+//                    "        ",
+//                    "     K  ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "   n    ")),
 
-            `$` (PieceColor.BLACK,
-                arrayOf(
-                    " k      ",
-                    "        ",
-                    "        ",
-                    "     K  ",
-                    "        ",
-                    "        ",
-                    "   p    ",
-                    "        "),
-                arrayOf(
-                    " k      ",
-                    "        ",
-                    "        ",
-                    "     K  ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "   n    ")),
-
-            `$` (PieceColor.WHITE,
+            `$` (BoardState.WHITE,
                 arrayOf(
                     " k      ",
                     "        ",
@@ -142,7 +142,7 @@ internal class SearchNodeTest {
                     "        ",
                     "  KR    ")),
 
-            `$` (PieceColor.WHITE,
+            `$` (BoardState.WHITE,
                 arrayOf(
                     " k      ",
                     "        ",
@@ -162,7 +162,7 @@ internal class SearchNodeTest {
                     "        ",
                     "     RK ")),
 
-            `$` (PieceColor.BLACK,
+            `$` (BoardState.BLACK,
                 arrayOf(
                     "r   k   ",
                     "        ",
@@ -183,7 +183,7 @@ internal class SearchNodeTest {
                     "    K  R")),
 
 
-            `$` (PieceColor.BLACK,
+            `$` (BoardState.BLACK,
                 arrayOf(
                     "rnb.kb..",
                     "ppqppppr",
@@ -204,7 +204,7 @@ internal class SearchNodeTest {
                     "..BQKBNR")),
 
 
-            `$` (PieceColor.WHITE,
+            `$` (BoardState.WHITE,
                 arrayOf(
                     " . k . .",
                     ".Q. . . ",

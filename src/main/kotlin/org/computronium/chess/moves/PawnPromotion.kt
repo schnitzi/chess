@@ -1,6 +1,6 @@
 package org.computronium.chess.moves
 
-import org.computronium.chess.Board
+import org.computronium.chess.BoardState
 import org.computronium.chess.Piece
 import org.computronium.chess.PieceType
 
@@ -8,21 +8,24 @@ class PawnPromotion(val from: Int, val to: Int, private val promoteTo: PieceType
 
     private var pawn: Piece? = null
 
-    override fun apply(board: Board) {
+    override fun apply(boardState: BoardState) {
 
-        pawn = board[from]
-        board[from] = null
-        board[to] = Piece.forTypeAndColor(promoteTo, pawn!!.color)
+        pawn = boardState[from]
+        boardState[from] = null
+        boardState[to] = Piece.forTypeAndColor(promoteTo, pawn!!.color)
 
-        super.apply(board)
+        super.apply(boardState)
     }
 
-    override fun rollback(board: Board) {
+    override fun rollback(boardState: BoardState) {
 
-        super.rollback(board)
+        super.rollback(boardState)
 
-        board[from] = pawn
-        board[to] = null
+        boardState[from] = pawn
+        boardState[to] = null
     }
 
+    override fun toString(boardState: BoardState): String {
+        return BoardState.squareName(to) + "=" + promoteTo.letter
+    }
 }
