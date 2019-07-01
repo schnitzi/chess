@@ -14,18 +14,31 @@ abstract class Move {
     private var whoseTurnIsInCheck : Boolean = false
 
     open fun apply(boardState: BoardState) {
+
         enPassantCapturePos = boardState.enPassantCapturePos
+
         boardState.enPassantCapturePos = null
+
         whoseTurnIsInCheck = boardState.whoseTurnConfig().isInCheck
-        boardState.moveNumber++
+
+        if (boardState.whoseTurn == BoardState.BLACK) {
+            boardState.moveNumber++
+        }
+
         boardState.whoseTurn = 1 - boardState.whoseTurn
     }
 
     open fun rollback(boardState: BoardState) {
-        boardState.enPassantCapturePos = enPassantCapturePos
-        boardState.whoseTurnConfig().isInCheck = whoseTurnIsInCheck
-        boardState.moveNumber--
+
         boardState.whoseTurn = 1 - boardState.whoseTurn
+
+        if (boardState.whoseTurn == BoardState.BLACK) {
+            boardState.moveNumber--
+        }
+
+        boardState.whoseTurnConfig().isInCheck = whoseTurnIsInCheck
+
+        boardState.enPassantCapturePos = enPassantCapturePos
     }
 
     abstract fun toString(boardState: BoardState): String

@@ -1,18 +1,13 @@
 package org.computronium.chess.moves
 
 import org.computronium.chess.BoardState
-import org.computronium.chess.Piece
-import org.computronium.chess.PieceType
 
 /**
  * Class representing a move.
  */
-open class StandardCapture(from : Int, to : Int) : StandardMove(from, to) {
+open class PawnMove(var from : Int, var to : Int) : Move() {
 
-
-    private var capturedPiece: Piece? = null
-
-    private var halfMovesSinceCaptureOrPawnAdvance: Int = 0
+    private var halfMovesSinceCaptureOrPawnAdvance = 0
 
     /**
      * This will generate a simplified version of the last move in Algebraic notation that
@@ -23,26 +18,21 @@ open class StandardCapture(from : Int, to : Int) : StandardMove(from, to) {
     override fun toString(boardState: BoardState): String {
         val sb = StringBuilder()
         val piece = boardState[from]
-        val capturedPiece = boardState[to]
-        if (piece!!.type != PieceType.PAWN) {
-            sb.append(piece.type.letter)
-        } else if (capturedPiece != null) {
-            sb.append(BoardState.fileChar(from))
+        sb.append(BoardState.squareName(to))
+        if (resultsInCheck) {
+            sb.append("+")
         }
-        sb.append("x")
-        sb.append(to)
         return sb.toString()
     }
 
     override fun apply(boardState: BoardState) {
 
-        capturedPiece = boardState[to]
+        boardState.move(from, to)
 
         halfMovesSinceCaptureOrPawnAdvance = boardState.halfMovesSinceCaptureOrPawnAdvance
+        boardState.halfMovesSinceCaptureOrPawnAdvance = 0
 
         super.apply(boardState)
-
-        boardState.halfMovesSinceCaptureOrPawnAdvance = 0
     }
 
     override fun rollback(boardState: BoardState) {
@@ -51,6 +41,6 @@ open class StandardCapture(from : Int, to : Int) : StandardMove(from, to) {
 
         boardState.halfMovesSinceCaptureOrPawnAdvance = halfMovesSinceCaptureOrPawnAdvance
 
-        boardState[to] = capturedPiece
+        boardState.move(to, from)
     }
 }

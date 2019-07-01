@@ -4,17 +4,17 @@ import org.computronium.chess.BoardState
 import org.computronium.chess.Piece
 import org.computronium.chess.PieceType
 
-class PawnPromotion(val from: Int, val to: Int, private val promoteTo: PieceType) : Move() {
+class PawnPromotion(from: Int, to: Int, private val promoteTo: PieceType) : PawnMove(from, to) {
 
     private var pawn: Piece? = null
 
     override fun apply(boardState: BoardState) {
 
         pawn = boardState[from]
-        boardState[from] = null
-        boardState[to] = Piece.forTypeAndColor(promoteTo, pawn!!.color)
 
         super.apply(boardState)
+
+        boardState[to] = Piece.forTypeAndColor(promoteTo, pawn!!.color)
     }
 
     override fun rollback(boardState: BoardState) {
@@ -22,7 +22,6 @@ class PawnPromotion(val from: Int, val to: Int, private val promoteTo: PieceType
         super.rollback(boardState)
 
         boardState[from] = pawn
-        boardState[to] = null
     }
 
     override fun toString(boardState: BoardState): String {

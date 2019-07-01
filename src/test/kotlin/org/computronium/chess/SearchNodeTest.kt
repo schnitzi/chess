@@ -16,22 +16,32 @@ internal class SearchNodeTest {
     @UseDataProvider(value = "findMovesData")
     fun findMoves(startFEN: String, expectedMoveFEN: String) {
         val startBoard = SearchNode.fromFEN(startFEN)
-        println("start =\n$startBoard")
+        println("$startBoard")
+        println("start       = ${startBoard.boardState.toFEN()}")
         val expected = BoardState.fromFEN(expectedMoveFEN)
 
-        println("expected =\n$expected")
+        val actuals = mutableListOf<String>()
         var found = false
+        var match : String? = null
         for (move in startBoard.moves) {
-            println("move = ${move.toString(startBoard.boardState)}\n")
+            //println("move = ${move.toString(startBoard.boardState)}\n")
             move.apply(startBoard.boardState)
-            println("${startBoard.boardState}")
-            if (startBoard.boardState == expected) {
+            val actual = startBoard.boardState.toFEN()
+            //println("$expectedMoveFEN =\n$actual ?")
+            actuals.add(actual)
+            if (expectedMoveFEN == actual) {
                 found = true
                 break
+            } else if (expectedMoveFEN.split(" ")[0] == actual.split(" ")[0]) {
+                match = actual
             }
             move.rollback(startBoard.boardState)
         }
-        Assert.assertTrue(found)
+        if (!found) {
+            println("expected    = $expectedMoveFEN")
+            println("close match = $match")
+        }
+        Assert.assertTrue("Expected\n$expectedMoveFEN, found\n$actuals", found)
     }
 
     companion object {
@@ -42,8 +52,9 @@ internal class SearchNodeTest {
 //             @formatter:off
 
 
-//            `$` (BoardState.WHITE,
-//                arrayOf(
+//            `$` (
+//                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+//                "rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR b KQkq - 0 1"),
 //                    "rnbqkbnr",
 //                    "pppppppp",
 //                    "        ",
@@ -52,7 +63,7 @@ internal class SearchNodeTest {
 //                    "        ",
 //                    "PPPPPPPP",
 //                    "RNBQKBNR"),
-//                arrayOf(
+//
 //                    "rnbqkbnr",
 //                    "pppppppp",
 //                    "        ",
@@ -61,7 +72,10 @@ internal class SearchNodeTest {
 //                    "P       ",
 //                    " PPPPPPP",
 //                    "RNBQKBNR")),
-//
+
+            `$` (
+                "1k6/5P2/8/8/8/8/8/4K3 w - - 20 1",
+                "1k3Q2/8/8/8/8/8/8/4K3 b - - 21 0")
 //            `$` (BoardState.WHITE,
 //                arrayOf(
 //                    " k      ",
@@ -122,107 +136,105 @@ internal class SearchNodeTest {
 //                    "        ",
 //                    "   n    ")),
 
-            `$` (BoardState.WHITE,
-                arrayOf(
-                    " k      ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "R   K   "),
-                arrayOf(
-                    " k      ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "  KR    ")),
+//            `$` (BoardState.WHITE,
+//                arrayOf(
+//                    " k      ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "R   K   "),
+//                arrayOf(
+//                    " k      ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "  KR    ")),
 
-            `$` (BoardState.WHITE,
-                arrayOf(
-                    " k      ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "    K  R"),
-                arrayOf(
-                    " k      ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "     RK ")),
+//            `$` (BoardState.WHITE,
+//                arrayOf(
+//                    " k      ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "    K  R"),
+//                arrayOf(
+//                    " k      ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "     RK ")),
 
-            `$` (BoardState.BLACK,
-                arrayOf(
-                    "r   k   ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "    K  R"),
-                arrayOf(
-                    "  kr    ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "        ",
-                    "    K  R")),
+//            `$` (BoardState.BLACK,
+//                arrayOf(
+//                    "r   k   ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "    K  R"),
+//                arrayOf(
+//                    "  kr    ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "        ",
+//                    "    K  R")),
 
+//            `$` (BoardState.BLACK,
+//                arrayOf(
+//                    "rnb.kb..",
+//                    "ppqppppr",
+//                    ".....N..",
+//                    "..p....p",
+//                    "........",
+//                    "P....P..",
+//                    "RPPPP.PP",
+//                    "..BQKBNR"),
+//                arrayOf(
+//                    "rnbk.b..",
+//                    "ppqppppr",
+//                    ".....N..",
+//                    "..p....p",
+//                    "........",
+//                    "P....P..",
+//                    "RPPPP.PP",
+//                    "..BQKBNR")),
 
-            `$` (BoardState.BLACK,
-                arrayOf(
-                    "rnb.kb..",
-                    "ppqppppr",
-                    ".....N..",
-                    "..p....p",
-                    "........",
-                    "P....P..",
-                    "RPPPP.PP",
-                    "..BQKBNR"),
-                arrayOf(
-                    "rnbk.b..",
-                    "ppqppppr",
-                    ".....N..",
-                    "..p....p",
-                    "........",
-                    "P....P..",
-                    "RPPPP.PP",
-                    "..BQKBNR")),
-
-
-            `$` (BoardState.WHITE,
-                arrayOf(
-                    " . k . .",
-                    ".Q. . . ",
-                    " . N . .",
-                    ". b . .p",
-                    "B. . . P",
-                    ". . .Pn ",
-                    " . . . .",
-                    ". .K. . "),
-                arrayOf(
-                    " . k . .",
-                    ".Q. .N. ",
-                    " .   . .",
-                    ". b . .p",
-                    "B. . . P",
-                    ". . .Pn ",
-                    " . . . .",
-                    ". .K. . "))
+//            `$` (BoardState.WHITE,
+//                arrayOf(
+//                    " . k . .",
+//                    ".Q. . . ",
+//                    " . N . .",
+//                    ". b . .p",
+//                    "B. . . P",
+//                    ". . .Pn ",
+//                    " . . . .",
+//                    ". .K. . "),
+//                arrayOf(
+//                    " . k . .",
+//                    ".Q. .N. ",
+//                    " .   . .",
+//                    ". b . .p",
+//                    "B. . . P",
+//                    ". . .Pn ",
+//                    " . . . .",
+//                    ". .K. . "))
         )
     }
 }

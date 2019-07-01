@@ -29,7 +29,7 @@ class BoardState(private val board: Array<Piece?>) {
 
     var enPassantCapturePos: Int? = null
 
-    var halfMoveClock = 0
+    var halfMovesSinceCaptureOrPawnAdvance = 0
 
     init {
         // Save the coordinate for each king, so we can figure out if the king is in check.
@@ -54,6 +54,54 @@ class BoardState(private val board: Array<Piece?>) {
         }
 
         sb.append("$whoseTurn to move")
+        return sb.toString()
+    }
+
+    fun toFEN() : String {
+
+        val sb = StringBuilder()
+
+        for (rank in 7 downTo 0) {
+            var count = 0
+            for (file in 0..7) {
+                val piece = board[indexOf(file, rank)]
+                if (piece == null) {
+                    count++
+                } else {
+                    if (count > 0) {
+                        sb.append(count)
+                        count = 0
+                    }
+                    sb.append(piece)
+                }
+            }
+            if (count > 0) {
+                sb.append(count)
+            }
+            if (rank > 0) {
+                sb.append("/")
+            }
+        }
+
+        sb.append(" ")
+            .append(if (whoseTurn == WHITE) "w" else "b")
+            .append(" ")
+
+        if (!sideConfig[WHITE].canKingSideCastle &&
+            !sideConfig[WHITE].canQueenSideCastle &&
+            !sideConfig[BLACK].canKingSideCastle &&
+            !sideConfig[BLACK].canQueenSideCastle) {
+            sb.append("-")
+        } else {
+            if (sideConfig[WHITE].canKingSideCastle) sb.append("K")
+            if (sideConfig[WHITE].canQueenSideCastle) sb.append("Q")
+            if (sideConfig[BLACK].canKingSideCastle) sb.append("k")
+            if (sideConfig[BLACK].canQueenSideCastle) sb.append("q")
+        }
+
+        sb.append(" ").append(if (enPassantCapturePos == null) "-" else squareName(enPassantCapturePos!!))
+
+        sb.append(" $halfMovesSinceCaptureOrPawnAdvance $moveNumber")
         return sb.toString()
     }
 
@@ -201,7 +249,7 @@ class BoardState(private val board: Array<Piece?>) {
                     val index = indexOf(file, rank)
                     BOARD_INDEXES.add(index)
                     ON_BOARD[index] = true
-                    SQUARES[index] = "" + rankChar(index) + fileChar(index)
+                    SQUARES[index] = "" + (97+file).toChar() + (rank+1)
                 }
             }
         }
@@ -240,8 +288,9 @@ class BoardState(private val board: Array<Piece?>) {
                 boardState.enPassantCapturePos = BoardState.squareFor(enPassantCaptureSquare)
             }
 
-            boardState.halfMoveClock = tokenizer.nextToken().toInt()
+            boardState.halfMovesSinceCaptureOrPawnAdvance = tokenizer.nextToken().toInt()
 
+            boardState.moveNumber = tokenizer.nextToken().toInt()
 
             return boardState
         }
@@ -251,7 +300,7 @@ class BoardState(private val board: Array<Piece?>) {
             var i = 0
             var rank = 7
             var file = 0
-            while (rank >= 0) {
+            while (i < boardString.length) {
                 val c = boardString[i++]
                 when {
                     c == '/' -> {

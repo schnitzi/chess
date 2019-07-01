@@ -8,6 +8,8 @@ import org.computronium.chess.PieceType
  */
 open class StandardMove(var from : Int, var to : Int) : Move() {
 
+    private var halfMovesSinceCaptureOrPawnAdvance = 0
+
     /**
      * This will generate a simplified version of the last move in Algebraic notation that
      * suffices in most cases.  However, sometimes this version is ambiguous, and needs more
@@ -31,16 +33,22 @@ open class StandardMove(var from : Int, var to : Int) : Move() {
 
         boardState.move(from, to)
 
-        boardState.halfMoveClock++
+        halfMovesSinceCaptureOrPawnAdvance = boardState.halfMovesSinceCaptureOrPawnAdvance
+        boardState.halfMovesSinceCaptureOrPawnAdvance++
 
         super.apply(boardState)
+
+        if (boardState[to]!!.type == PieceType.PAWN) {
+
+            boardState.halfMovesSinceCaptureOrPawnAdvance = 0
+        }
     }
 
     override fun rollback(boardState: BoardState) {
 
         super.rollback(boardState)
 
-        boardState.halfMoveClock--
+        boardState.halfMovesSinceCaptureOrPawnAdvance = halfMovesSinceCaptureOrPawnAdvance
 
         boardState.move(to, from)
     }
